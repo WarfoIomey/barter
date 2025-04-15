@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {% if '/edit/' in request.path %}
+    Редактирование объявления
+  {% elif "/delete/" in request.path %}
+    Удаление объявления
+  {% else %}
+    Добавление объявления
+  {% endif %}
+{% endblock %}
+{% block content %}
+  <div class="col d-flex justify-content-center">
+    <div class="card" style="width: 40rem;">
+      <div class="card-header">
+        {% if '/edit/' in request.path %}
+          Редактирование объявления
+        {% elif '/delete/' in request.path %}
+          Удаление объявления
+        {% else %}
+          Добавление объявления
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% if not '/delete/' in request.path %}
+            {% bootstrap_form form %}
+          {% else %}
+            <article>
+              {% if form.instance.image %}
+                <a href="{{ form.instance.image.url }}" target="_blank">
+                  <img class="border-3 rounded img-fluid img-thumbnail mb-2" src="{{ form.instance.image.url }}">
+                </a>
+              {% endif %}
+              <h3>{{ form.instance.title }}</h3>
+              <small>
+                Дата создания: {{ form.instance.created_at|date:"d E Y" }}<br>
+                Категория: {{ form.instance.category.title }}<br>
+                Состояние: {{ form.instance.condition.title }}<br>
+                <p>Описание: {{ form.instance.descriptions|linebreaksbr }}</p>
+              </small>
+              <p class="text-danger">Вы уверенны что хотите удалить это объявление?</p>
+            </article>
+          {% endif %}
+          {% bootstrap_button button_type="submit" content="Отправить" %}
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

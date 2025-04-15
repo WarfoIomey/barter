@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}
+  {{ ad.title }}
+  {{ ad.created_at|date:"d E Y" }}
+{% endblock %}
+{% block content %}
+  <div class="col d-flex justify-content-center">
+    <div class="card" style="width: 40rem;">
+      <div class="card-body">
+        {% if ad.image %}
+          <a href="{{ ad.image.url }}" target="_blank">
+            <img class="border-3 rounded img-fluid img-thumbnail mb-2 mx-auto d-block" src="{{ ad.image.url }}">
+          </a>
+        {% endif %}
+        <h5 class="card-title">{{ ad.title }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">
+          <small>
+            {{ ad.created_at|date:"d E Y" }}<br>
+            От автора <a class="text-muted" href="{% url 'ads:profile' ad.user.username %}">@{{ ad.user.username }}</a> в
+            категории {{ ad.category.title}}
+          </small>
+        </h6>
+        <p class="card-text">{{ ad.descriptions|linebreaksbr }}</p>
+        {% if user == ad.user %}
+          <div class="mb-2">
+            <a class="btn btn-sm text-muted" href="{% url 'ads:edit_ad' ad.id %}" role="button">
+              Отредактировать объявление
+            </a>
+            <a class="btn btn-sm text-muted" href="{% url 'ads:delete_ad' ad.id %}" role="button">
+              Удалить объявление
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
