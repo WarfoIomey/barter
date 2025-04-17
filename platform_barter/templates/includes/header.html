@@ -15,19 +15,33 @@
           </li>
           {% if user.is_authenticated %}
             <div class="btn-group" role="group" aria-label="Basic outlined example">
-              {% comment %} <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset" {% endcomment %}
-                  {% comment %} href="{% url 'blog:create_post' %}">Написать пост</a></button> {% endcomment %}
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'ads:profile' user.username %}">{{ user.username }}</a></button>
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'logout' %}">Выйти</a></button>
+              <a href="{% url 'ads:create_ad' %}" 
+                class="btn btn-outline-primary {% if view_name == 'ads:create_ad' %}active{% endif %}">
+                Написать объявление
+              </a>
+              <a href="{% url 'ads:create_proposal' %}" 
+                class="btn btn-outline-primary {% if view_name == 'ads:create_proposal' %}active{% endif %}">
+                Предложить обмен
+              </a>
+              <a href="{% url 'ads:profile' user.username %}" 
+                class="btn btn-outline-primary {% if view_name == 'ads:profile' %}active{% endif %}">
+                {{ user.username }}
+              </a>
+              <a href="{% url 'logout' %}" 
+                class="btn btn-outline-primary">
+                Выйти
+              </a>
             </div>
           {% else %}
             <div class="btn-group" role="group" aria-label="Basic outlined example">
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'login' %}">Войти</a></button>
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'registration' %}">Регистрация</a></button>
+              <a href="{% url 'login' %}" 
+                class="btn btn-outline-primary {% if view_name == 'login' %}active{% endif %}">
+                Войти
+              </a>
+              <a href="{% url 'registration' %}" 
+                class="btn btn-outline-primary {% if view_name == 'registration' %}active{% endif %}">
+                Регистрация
+              </a>
             </div>
           {% endif %}
         </ul>

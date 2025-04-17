@@ -1,0 +1,32 @@
+{% load querystring_utils %}
+{% if received_proposals.has_other_pages %}
+  <nav aria-label="Receiver Proposals Pagination" class="my-5">
+    <ul class="pagination justify-content-center">
+      {% if received_proposals.has_previous %}
+        <li class="page-item"><a class="page-link" href="?received_page=1{{ request.GET.urlencode|cut:'received_page='|yesno:',&' }}">Первая</a></li>
+        <li class="page-item">
+          <a class="page-link" href="?received_page={{ received_proposals.previous_page_number }}{{ request.GET.urlencode|cut:'received_page='|yesno:',&' }}">
+            <<
+          </a>
+        </li>
+      {% endif %}
+      {% for i in received_proposals.paginator.page_range %}
+        {% if received_proposals.number == i %}
+          <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="{% update_query 'received_page' i %}">{{ i }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if received_proposals.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?received_page={{ received_proposals.next_page_number }}{{ request.GET.urlencode|cut:'received_page='|yesno:',&' }}">>></a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?received_page={{ received_proposals.paginator.num_pages }}{{ request.GET.urlencode|cut:'received_page='|yesno:',&' }}">Последняя</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}

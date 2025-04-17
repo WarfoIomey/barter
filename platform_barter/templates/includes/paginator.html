@@ -1,3 +1,4 @@
+{% load querystring_utils %}
 {% if page_obj.has_other_pages %}
   <nav aria-label="Page navigation" class="my-5">
     <ul class="pagination justify-content-center">
@@ -15,7 +16,7 @@
           </li>
         {% else %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            <a class="page-link" href="{% update_query 'page' i%}">{{ i }}</a>
           </li>
         {% endif %}
       {% endfor %}

@@ -11,22 +11,25 @@ class AdForm(forms.ModelForm):
     """Форма для объявлений."""
 
     title = forms.CharField(
+        label='Название объявления',
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Here goes the title"
+                "placeholder": "Напишите название"
             }
         )
     )
     descriptions = forms.CharField(
+        label='Описание объявления',
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Here goes the title"
+                "placeholder": "Напишите описание"
             }
         )
     )
     category = forms.ModelChoiceField(
+        label='Категория',
         queryset=Category.objects.all(),
         empty_label='Выберите категорию',
         widget=forms.Select(
@@ -36,6 +39,7 @@ class AdForm(forms.ModelForm):
         )
     )
     condition = forms.ModelChoiceField(
+        label='Состояние',
         queryset=Condition.objects.all(),
         empty_label='Выберите состояние',
         widget=forms.Select(
@@ -43,16 +47,6 @@ class AdForm(forms.ModelForm):
                 'class': 'form-control',
             }
         )
-    )
-    created_at = forms.DateField(
-        widget=forms.DateInput(
-            attrs={
-                'type': 'date',
-                'class': 'form-control',
-            },
-            format='%Y-%m-%d',
-        ),
-        required=False,
     )
 
     class Meta:
@@ -63,7 +57,6 @@ class AdForm(forms.ModelForm):
             'category',
             'condition',
             'image',
-            'created_at',
         )
 
 
@@ -71,40 +64,22 @@ class ExchangeProposalForm(forms.ModelForm):
     """Форма для предложений."""
 
     ad_sender = forms.ModelChoiceField(
-        queryset=Ad.objects.all(),
-        empty_label='Выберите объявления',
+        queryset=Ad.objects.none(),
+        empty_label='Выберите объявление',
         widget=forms.Select(
             attrs={
                 'class': 'form-control',
             }
-        )
+        ),
+        label='Объявление'
     )
     ad_receiver = forms.ModelChoiceField(
-        queryset=User.objects.all(),
+        queryset=User.objects.none(),
         widget=autocomplete.ModelSelect2(
-            url='user-autocomplete',
+            url='ads:user-autocomplete',
             attrs={'class': 'form-control'}
         ),
         label='Получатель'
-    )
-    status = forms.ChoiceField(
-        choices=ExchangeProposal.StatusChoices.choices,
-        initial=ExchangeProposal.StatusChoices.AWAITING,
-        widget=forms.Select(
-            attrs={
-                'class': 'form-control',
-            }
-        )
-    )
-    created_at = forms.DateField(
-        widget=forms.DateInput(
-            attrs={
-                'type': 'date',
-                'class': 'form-control',
-            },
-            format='%Y-%m-%d',
-        ),
-        required=False,
     )
 
     class Meta:
@@ -113,8 +88,35 @@ class ExchangeProposalForm(forms.ModelForm):
             'ad_sender',
             'ad_receiver',
             'comment',
+        )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['ad_sender'].queryset = Ad.objects.filter(user=user)
+            self.fields['ad_receiver'].queryset = User.objects.exclude(
+                id=user.id
+            )
+
+
+class ChangeStatusProposalForm(forms.ModelForm):
+    """Форма для изменения статуса предложения."""
+
+    status = forms.ChoiceField(
+        choices=ExchangeProposal.StatusChoices.choices,
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control',
+            }
+        ),
+        label='Статус'
+    )
+
+    class Meta:
+        model = ExchangeProposal
+        fields = (
             'status',
-            'created_at'
         )
 
 
@@ -135,7 +137,8 @@ class ConditionForm(forms.ModelForm):
 
 
 class UserForm(forms.ModelForm):
-
+    """Форма для пользователя."""
+    
     class Meta:
         model = User
         fields = ('username', 'first_name', 'last_name', 'email', )

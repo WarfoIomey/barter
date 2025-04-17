@@ -1,0 +1,30 @@
+<div class="container-fluid">
+  <form class="d-flex" method="get" action="{% url 'ads:profile' profile.username %}">
+      <input class="form-control me-2" 
+             type="search" 
+             name="q" 
+             placeholder="Поиск по названию/описанию" 
+             value="{{ request.GET.q }}">
+      <select class="form-select me-2" name="category">
+          <option value="">Все категории</option>
+          {% for category in categories %}
+              <option value="{{ category.id }}" 
+                  {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                  {{ category.title }}
+              </option>
+          {% endfor %}
+      </select>
+      <select class="form-select me-2" name="condition">
+          <option value="">Любое состояние</option>
+          {% for condition in conditions %}
+              <option value="{{ condition.id }}"
+                  {% if request.GET.condition == condition.id|stringformat:"s" %}selected{% endif %}>
+                  {{ condition.title }}
+              </option>
+          {% endfor %}
+      </select>
+      
+      <button class="btn btn-outline-success" type="submit">Поиск</button>
+      <a href="{% url 'ads:profile' profile.username %}" class="btn btn-outline-secondary ms-2">Сбросить</a>
+  </form>
+</div><br>

@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 import ads.constants as constants
@@ -53,6 +52,7 @@ class Category(models.Model):
 
 class Condition(models.Model):
     """Модель состояний."""
+
     title = models.TextField(
         max_length=constants.NAME_MAX_LENGTH,
         verbose_name='Название состояния',
@@ -88,11 +88,12 @@ class Condition(models.Model):
 
 class Ad(models.Model):
     """Модель объявления."""
-    
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE,
         verbose_name='Пользователь',
-        help_text='Укажите пользователя'
+        help_text='Укажите пользователя',
+        related_name='ads'
     )
     title = models.TextField(
         max_length=constants.NAME_MAX_LENGTH,
@@ -121,10 +122,10 @@ class Ad(models.Model):
         blank=True
     )
     created_at = models.DateField(
-        default=timezone.now,
         help_text='Время создания объявления',
         verbose_name='Дата и время создания',
-        editable=True
+        editable=True,
+        auto_now_add=True,
     )
 
     class Meta:
@@ -194,7 +195,7 @@ class ExchangeProposal(models.Model):
         verbose_name='Статус предложения'
     )
     created_at = models.DateField(
-        default=timezone.now,
+        auto_now_add=True,
         help_text='Время создания предложения',
         verbose_name='Дата и время создания',
         editable=True

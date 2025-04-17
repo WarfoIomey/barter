@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'ads.apps.AdsConfig',
     'pages.apps.PagesConfig',
     'django_bootstrap5',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -109,7 +110,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 3
+}
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -125,6 +132,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
+
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
@@ -132,6 +141,8 @@ STATICFILES_DIRS = [
 ]
 
 LOGIN_URL = 'login'
+
+LOGIN_REDIRECT_URL = 'ads:index'
 
 MEDIA_URL = 'media/'
 

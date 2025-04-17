@@ -12,7 +12,7 @@ handler500 = 'pages.views.failure_server'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('ads.urls', namespace='ads')),
-    path('api/', include('api.urls')),
+    path('api/', include('api.urls', namespace='api')),
     path('auth/', include('django.contrib.auth.urls')),
     path(
         'auth/registration/',

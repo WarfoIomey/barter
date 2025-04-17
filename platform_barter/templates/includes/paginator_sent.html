@@ -1,0 +1,32 @@
+{% load querystring_utils %}
+{% if sent_proposals.has_other_pages %}
+  <nav aria-label="Sent Proposals Pagination" class="my-5">
+    <ul class="pagination justify-content-center">
+      {% if sent_proposals.has_previous %}
+        <li class="page-item"><a class="page-link" href="?sent_page=1{{ request.GET.urlencode|cut:'sent_page='|yesno:',&' }}">Первая</a></li>
+        <li class="page-item">
+          <a class="page-link" href="?sent_page={{ sent_proposals.previous_page_number }}{{ request.GET.urlencode|cut:'sent_page='|yesno:',&' }}">
+            <<
+          </a>
+        </li>
+      {% endif %}
+      {% for i in sent_proposals.paginator.page_range %}
+        {% if sent_proposals.number == i %}
+          <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="{% update_query 'sent_page' i %}">{{ i }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if sent_proposals.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?sent_page={{ sent_proposals.next_page_number }}{{ request.GET.urlencode|cut:'sent_page='|yesno:',&' }}">>></a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?sent_page={{ sent_proposals.paginator.num_pages }}{{ request.GET.urlencode|cut:'sent_page='|yesno:',&' }}">Последняя</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
