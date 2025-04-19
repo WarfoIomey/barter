@@ -35,7 +35,15 @@
     ```bash
     python manage.py migrate
     ```
-6. Запустите сервер разработки:
+6. (Опционально) Загрузите заготованные данные из файла db.json в базу данных:
+
+    Учетная запись для входа
+       - Логин: admin
+       - Пароль: admin
+    ```bash
+    python manage.py loaddata db.json
+    ```
+7. Запустите сервер разработки:
     ```bash
     python manage.py runserver
     ```

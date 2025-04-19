@@ -1,4 +1,6 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.shortcuts import redirect
 
 from .models import Ad, ExchangeProposal
@@ -7,19 +9,17 @@ from .models import Ad, ExchangeProposal
 class OnlyAuthorAdMixin(UserPassesTestMixin):
     """Миксин для проверки авторства объявления."""
 
+    login_url = '/auth/login/'
+    redirect_field_name = 'next'
+
     def handle_no_permission(self):
-        return redirect('ads:ad_detail', ad_id=self.kwargs['ad_id'])
+        if not self.request.user.is_authenticated:
+            return redirect(f'{self.login_url}?next={self.request.path}')
+        raise Http404("Страница не найдена")
 
     def test_func(self):
         object = self.get_object()
         return object.user == self.request.user
-
-
-class OnlyAuthorProposalMixin(UserPassesTestMixin):
-    """Миксин для проверки авторства предложения."""
-
-    def handle_no_permission(self):
-        return redirect('ads:profile', username=self.request.user.username)
 
 
 class AdEditMixin(OnlyAuthorAdMixin):
@@ -30,7 +30,7 @@ class AdEditMixin(OnlyAuthorAdMixin):
     pk_url_kwarg = 'ad_id'
 
 
-class ProposalEditMixin(OnlyAuthorProposalMixin):
+class ProposalEditMixin(OnlyAuthorAdMixin):
     """Миксин для редактирования предложения."""
 
     model = ExchangeProposal

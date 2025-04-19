@@ -47,7 +47,7 @@ class Category(models.Model):
         Returns:
             str: Название состояние, описание состояния и slug.
         """
-        return f'{self.title} - {self.descriptions} - {self.slug} '
+        return f'{self.title}'
 
 
 class Condition(models.Model):
@@ -83,7 +83,7 @@ class Condition(models.Model):
         Returns:
             str: Название состояние и описание состояния.
         """
-        return f'{self.title} - {self.descriptions} '
+        return f'{self.title}'
 
 
 class Ad(models.Model):

@@ -1,5 +1,5 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
 )
@@ -30,14 +30,14 @@ class AdListView(ListView):
 
     model = Ad
     template_name = 'ads/index.html'
-    paginate_by = constants.PAGINATION_PER_PAGE
+    paginate_by = constants.PAGINATION_PER_PAGE_AD
 
     def get_queryset(self):
         """Получение всех объявлений."""
         return get_ads()
 
 
-class AdCreateView(CreateView):
+class AdCreateView(LoginRequiredMixin, CreateView):
     """Создание объявления."""
 
     model = Ad
@@ -64,7 +64,7 @@ class AdDetailView(DetailView):
     pk_url_kwarg = 'ad_id'
 
 
-class AdUpdateView(AdEditMixin, UpdateView):
+class AdUpdateView(LoginRequiredMixin, AdEditMixin, UpdateView):
     """Редактирование объявления."""
 
     form_class = AdForm
@@ -77,7 +77,7 @@ class AdUpdateView(AdEditMixin, UpdateView):
         )
 
 
-class AdDeleteView(AdEditMixin, DeleteView):
+class AdDeleteView(LoginRequiredMixin, AdEditMixin, DeleteView):
     """Удаление объявления."""
 
     success_url = reverse_lazy('ads:index')
@@ -89,7 +89,7 @@ class AdDeleteView(AdEditMixin, DeleteView):
         return context
 
 
-class ProposalCreateView(CreateView):
+class ProposalCreateView(LoginRequiredMixin, CreateView):
     """Создание предложения."""
 
     model = ExchangeProposal
@@ -102,11 +102,6 @@ class ProposalCreateView(CreateView):
         kwargs['user'] = self.request.user
         return kwargs
 
-    def form_valid(self, form):
-        """Автоподстановка пользователя."""
-        form.instance.user = self.request.user
-        return super().form_valid(form)
-
     def get_success_url(self):
         """Перенаправление на страницу профиля."""
         return reverse(
@@ -115,7 +110,7 @@ class ProposalCreateView(CreateView):
         )
 
 
-class ProposalDeleteView(ProposalEditMixin, DeleteView):
+class ProposalDeleteView(LoginRequiredMixin, ProposalEditMixin, DeleteView):
     """Удаление предложения."""
 
     def get_success_url(self):
@@ -140,7 +135,7 @@ class ProposalDeleteView(ProposalEditMixin, DeleteView):
         return object.ad_sender.user.id == self.request.user.id
 
 
-class ProposalUpdateView(ProposalEditMixin, UpdateView):
+class ProposalUpdateView(LoginRequiredMixin, ProposalEditMixin, UpdateView):
     """Редактирование предложения."""
 
     form_class = ChangeStatusProposalForm
@@ -181,7 +176,7 @@ class ProfileDetailView(ListView):
     """Обзор профиля."""
 
     model = Ad
-    paginate_by = constants.PAGINATION_PER_PAGE
+    paginate_by = constants.PAGINATION_PER_PAGE_AD
     template_name = 'ads/profile.html'
     user = None
 
@@ -232,12 +227,12 @@ class ProfileDetailView(ListView):
                     ad_sender__user=sender
                 ).order_by('-created_at', '-status')
 
-            paginator_ads = Paginator(ads, constants.PAGINATION_PER_PAGE)
+            paginator_ads = Paginator(ads, constants.PAGINATION_PER_PAGE_AD)
             page_number = self.request.GET.get('page')
             context['page_obj'] = paginator_ads.get_page(page_number)
             paginator_sent = Paginator(
                 proposal_receiver,
-                constants.PAGINATION_PER_PAGE - 2
+                constants.PAGINATION_PER_PAGE_PROPOSAL
             )
             sent_page_number = self.request.GET.get('sent_page')
             context['sent_proposals'] = paginator_sent.get_page(
@@ -245,7 +240,7 @@ class ProfileDetailView(ListView):
             )
             paginator_received = Paginator(
                 proposal_sender,
-                constants.PAGINATION_PER_PAGE - 2
+                constants.PAGINATION_PER_PAGE_PROPOSAL
             )
             received_page_number = self.request.GET.get('received_page')
             context['received_proposals'] = paginator_received.get_page(
@@ -260,7 +255,7 @@ class ProfileDetailView(ListView):
         return context
 
 
-class ProfileUpdateView(UserPassesTestMixin, UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """Изменение профиля."""
 
     model = User
