@@ -28,6 +28,12 @@ def another_author(django_user_model):
 
 
 @pytest.fixture
+def test_author(django_user_model):
+    """Другой пользователь."""
+    return django_user_model.objects.create(username='Test')
+
+
+@pytest.fixture
 def another_author_client(another_author):
     """Клиент другого пользователя."""
     client = Client()
@@ -167,6 +173,81 @@ def proposal_receiver(ad_another_user, author):
 
 
 @pytest.fixture
+def create_test_data(author, another_author):
+    """Фикстура для создания тестовых данных."""
+    category1 = Category.objects.create(
+        title='Категория 1',
+        descriptions='Описание категории 1',
+        slug='categoryone'
+    )
+    category2 = Category.objects.create(
+        title='Категория 2',
+        descriptions='Описание категории 2',
+        slug='categorytwo'
+    )
+    condition1 = Condition.objects.create(
+        title='Новая',
+        descriptions='Описание состояния 1'
+    )
+    condition2 = Condition.objects.create(
+        title='Использованная',
+        descriptions='Описание состояния 2'
+    )
+    Ad.objects.create(
+        title='Первый тест объявления 1',
+        descriptions='Тест Описания 1',
+        user=author,
+        category=category1,
+        condition=condition1
+    )
+    Ad.objects.create(
+        title='Другой тест объявления',
+        descriptions='Описание 2',
+        user=author,
+        category=category2,
+        condition=condition2
+    )
+    Ad.objects.create(
+        title='тест объявления пользователя 2',
+        descriptions='Описание 3',
+        user=another_author,
+        category=category2,
+        condition=condition2
+    )
+    Ad.objects.create(
+        title='Другой объявления пользователя 2',
+        descriptions='Описание 4',
+        user=another_author,
+        category=category2,
+        condition=condition2
+    )
+    ExchangeProposal.objects.create(
+        ad_sender=Ad.objects.get(id=1),
+        ad_receiver=another_author,
+        comment='Тестовый комментарий 1',
+        status=ExchangeProposal.StatusChoices.AWAITING
+    )
+    ExchangeProposal.objects.create(
+        ad_sender=Ad.objects.get(id=2),
+        ad_receiver=another_author,
+        comment='Тестовый комментарий 3',
+        status=ExchangeProposal.StatusChoices.ACCEPTED
+    )
+    ExchangeProposal.objects.create(
+        ad_sender=Ad.objects.get(id=3),
+        ad_receiver=author,
+        comment='Тестовый комментарий 4',
+        status=ExchangeProposal.StatusChoices.CANCELLED
+    )
+    ExchangeProposal.objects.create(
+        ad_sender=Ad.objects.get(id=4),
+        ad_receiver=author,
+        comment='Тестовый комментарий 5',
+        status=ExchangeProposal.StatusChoices.AWAITING
+    )
+
+
+@pytest.fixture
 def url_reverse_profile(author) -> str:
     """Перенаправления на основную страницу."""
     return reverse(
@@ -240,9 +321,11 @@ def url_reverse_authorization() -> str:
 
 @pytest.fixture
 def url_reverse_signup() -> str:
+    """Ссылка на страницу регистрации."""
     return reverse('registration')
 
 
 @pytest.fixture
 def url_reverse_logout() -> str:
+    """Ссылка на страницу выхода."""
     return reverse('logout')

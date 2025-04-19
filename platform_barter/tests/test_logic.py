@@ -1,12 +1,15 @@
 from http import HTTPStatus
 
 import pytest
-from django.contrib.auth import get_user
+from django.urls import reverse
+from django.contrib.auth import get_user, get_user_model
 from pytest_django.asserts import assertRedirects
 from pytest_lazyfixture import lazy_fixture as lf
 
-from ads.models import Ad, ExchangeProposal
+from ads.models import Ad, Category, Condition, ExchangeProposal
 
+
+User = get_user_model()
 
 pytestmark = pytest.mark.django_db
 
@@ -301,3 +304,69 @@ def test_user_can_change_receiver_proposal(
     assertRedirects(response, url_reverse_profile)
     new_proposal = ExchangeProposal.objects.get(id=proposal_receiver.id)
     assert new_proposal.status == ExchangeProposal.StatusChoices.ACCEPTED
+
+
+@pytest.mark.parametrize(
+    'search_query, category_id, condition, expected_count',
+    (
+        ('тест', None, None, 2),
+        (None, 1, None, 1),
+        (None, None, 1, 1),
+        ('тест', 1, None, 1),
+    ),
+)
+def test_profile_search_ads(
+    author_client,
+    url_reverse_profile,
+    create_test_data,
+    search_query,
+    category_id,
+    condition,
+    expected_count
+):
+    """Тестирование поиска объявлений в профиле."""
+    params = {}
+    if search_query:
+        params['q'] = search_query
+    if category_id:
+        params['category'] = category_id
+    if condition:
+        params['condition'] = condition
+    response = author_client.get(url_reverse_profile, params)
+    assert response.status_code == 200
+    assert len(response.context['page_obj']) == expected_count
+
+
+@pytest.mark.parametrize(
+    'status_proposal, receiver, sender, expected_sent, expected_received',
+    [
+        ('awaiting', None, None, 1, 1),
+        (None, lf('test_author'), None, 0, 2),
+        (None, None, lf('author'), 2, 0),
+        ('accepted', lf('another_author'), None, 1, 0),
+    ]
+)
+def test_profile_filter_proposals(
+    author_client,
+    url_reverse_profile,
+    create_test_data,
+    status_proposal,
+    receiver,
+    sender,
+    expected_sent,
+    expected_received
+):
+    """Тестирование фильтрации предложений в профиле."""
+    params = {}
+    if status_proposal:
+        params['status_proposal'] = status_proposal
+    if receiver:
+        params['receiver'] = receiver.id
+    if sender:
+        params['sender'] = sender.id
+    response = author_client.get(url_reverse_profile, params)
+    assert response.status_code == 200
+    print(len(response.context['sent_proposals']))
+    print(len(response.context['received_proposals']))
+    assert len(response.context['sent_proposals']) == expected_sent
+    assert len(response.context['received_proposals']) == expected_received
